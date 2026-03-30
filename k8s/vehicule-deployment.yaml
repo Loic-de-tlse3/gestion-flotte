@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vehicule-service
+  namespace: vehicule-ns
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: vehicule-service
+      version: v1.0.0
+  template:
+    metadata:
+      labels:
+        app: vehicule-service
+        version: v1.0.0
+    spec:
+      containers:
+        - name: vehicule-service
+          image: vehicule-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          env:
+            - name: APP_PORT
+              value: "3000"
+            - name: KAFKA_BROKERS
+              value: "192.168.49.1:9092"
+            - name: KAFKA_TOPIC_VEHICULES
+              value: "vehicules"
+            - name: KAFKA_CLIENT_ID
+              value: "vehicule-service"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: url
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+

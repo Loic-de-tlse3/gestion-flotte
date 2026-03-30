@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: evenement-service
+  namespace: evenement-ns
+spec:
+  selector:
+    app: evenement-service
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3004
+

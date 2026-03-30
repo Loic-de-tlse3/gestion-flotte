@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vehicule-ns
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: conducteur-ns
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: maintenance-ns
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: localisation-ns
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: evenement-ns
