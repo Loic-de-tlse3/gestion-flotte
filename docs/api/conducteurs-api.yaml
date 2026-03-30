@@ -1,0 +1,92 @@
+openapi: 3.0.0
+info:
+  title: Driver Service API
+  version: 1.0.0
+  description: API pour la gestion des conducteurs
+paths:
+  /drivers:
+    get:
+      summary: Obtenir la liste des conducteurs
+      responses:
+        '200':
+          description: Une liste de conducteurs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Driver'
+    post:
+      summary: Créer un nouveau conducteur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Driver'
+      responses:
+        '201':
+          description: Conducteur créé
+  /drivers/{id}:
+    get:
+      summary: Obtenir les détails d'un conducteur
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Détails du conducteur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Driver'
+    put:
+      summary: Mettre à jour un conducteur
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Driver'
+      responses:
+        '200':
+          description: Conducteur mis à jour
+    delete:
+      summary: Supprimer un conducteur
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Conducteur supprimé
+components:
+  schemas:
+    Driver:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        license:
+          type: string
+        profile:
+          type: object
+          properties:
+            email:
+              type: string
+            phone:
+              type: string
+

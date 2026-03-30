@@ -1,0 +1,92 @@
+openapi: 3.0.0
+info:
+  title: Maintenance Service API
+  version: 1.0.0
+  description: API pour la gestion de la maintenance
+paths:
+  /maintenance:
+    get:
+      summary: Obtenir la liste des interventions de maintenance
+      responses:
+        '200':
+          description: Une liste d'interventions de maintenance
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Maintenance'
+    post:
+      summary: Planifier une nouvelle intervention de maintenance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Maintenance'
+      responses:
+        '201':
+          description: Intervention de maintenance planifiée
+  /maintenance/{id}:
+    get:
+      summary: Obtenir les détails d'une intervention de maintenance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Détails de l'intervention de maintenance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Maintenance'
+    put:
+      summary: Mettre à jour une intervention de maintenance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Maintenance'
+      responses:
+        '200':
+          description: Intervention de maintenance mise à jour
+    delete:
+      summary: Supprimer une intervention de maintenance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Intervention de maintenance supprimée
+components:
+  schemas:
+    Maintenance:
+      type: object
+      properties:
+        id:
+          type: string
+        vehicleId:
+          type: string
+        date:
+          type: string
+          format: date-time
+        type:
+          type: string
+        status:
+          type: string
+        cost:
+          type: number
+

@@ -1,0 +1,96 @@
+openapi: 3.0.0
+info:
+  title: Vehicle Service API
+  version: 1.0.0
+  description: API pour la gestion des véhicules
+paths:
+  /vehicles:
+    get:
+      summary: Obtenir la liste des véhicules
+      responses:
+        '200':
+          description: Une liste de véhicules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Vehicle'
+    post:
+      summary: Créer un nouveau véhicule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Vehicle'
+      responses:
+        '201':
+          description: Véhicule créé
+  /vehicles/{id}:
+    get:
+      summary: Obtenir les détails d'un véhicule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Détails du véhicule
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+    put:
+      summary: Mettre à jour un véhicule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Vehicle'
+      responses:
+        '200':
+          description: Véhicule mis à jour
+    delete:
+      summary: Supprimer un véhicule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Véhicule supprimé
+components:
+  schemas:
+    Vehicle:
+      type: object
+      properties:
+        id:
+          type: string
+        make:
+          type: string
+        model:
+          type: string
+        availability:
+          type: boolean
+        characteristics:
+          type: object
+          properties:
+            year:
+              type: integer
+            color:
+              type: string
+            capacity:
+              type: integer
+

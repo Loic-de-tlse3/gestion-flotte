@@ -1,0 +1,60 @@
+openapi: 3.0.0
+info:
+  title: Location Service API
+  version: 1.0.0
+  description: API pour la gestion de la localisation des véhicules
+paths:
+  /locations:
+    get:
+      summary: Obtenir la liste des localisations des véhicules
+      responses:
+        '200':
+          description: Une liste de localisations des véhicules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Location'
+    post:
+      summary: Mettre à jour la localisation d'un véhicule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Location'
+      responses:
+        '201':
+          description: Localisation mise à jour
+  /locations/{vehicleId}:
+    get:
+      summary: Obtenir la localisation d'un véhicule
+      parameters:
+        - name: vehicleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Localisation du véhicule
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
+components:
+  schemas:
+    Location:
+      type: object
+      properties:
+        vehicleId:
+          type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        timestamp:
+          type: string
+          format: date-time
+

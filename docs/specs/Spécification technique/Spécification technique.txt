@@ -1,0 +1,7 @@
+Administrateur modifie la disponibilité des véhicules (ajoute, supprime), observe leur historique et modifie leurs caractéristiques. Supprimer des comptes utilisateurs et envoyer des avertissements.
+
+Conducteur crée et modifie son profil, ajoute son permis et réserve des véhicules. Signaler des soucis tehniques. Consulter les véhicules
+
+Technicien planifie et suit les interventions passés, en cours et futur, indique les coûts de maintenance
+
+Localisation écrit toutes les deux minutes les coordonnées GPS des véhicules dans des fichiers propres à chacun, signale l'administrateur et le conducteur du véhicule lorsqu'il devient hors zone

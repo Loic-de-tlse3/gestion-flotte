@@ -1,0 +1,174 @@
+openapi: 3.0.0
+info:
+  title: Vehicle Service API
+  version: 1.0.0
+  description: API pour la gestion des véhicules
+paths:
+  /vehicles:
+    get:
+      summary: Obtenir la liste des véhicules
+      responses:
+        '200':
+          description: Une liste de véhicules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Vehicle'
+    post:
+      summary: Créer un nouveau véhicule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehicleCreate'
+      responses:
+        '201':
+          description: Véhicule créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        '400':
+          description: Requête invalide
+        '409':
+          description: Immatriculation déjà existante
+  /vehicles/{id}:
+    get:
+      summary: Obtenir les détails d'un véhicule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Détails du véhicule
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        '404':
+          description: Véhicule non trouvé
+    put:
+      summary: Mettre à jour un véhicule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehicleUpdate'
+      responses:
+        '200':
+          description: Véhicule mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        '404':
+          description: Véhicule non trouvé
+        '409':
+          description: Immatriculation déjà existante
+    delete:
+      summary: Supprimer un véhicule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Véhicule supprimé
+        '404':
+          description: Véhicule non trouvé
+components:
+  schemas:
+    Vehicle:
+      type: object
+      required:
+        - id
+        - immatriculation
+        - marque
+        - modele
+        - statut
+      properties:
+        id:
+          type: string
+          format: uuid
+        immatriculation:
+          type: string
+          maxLength: 20
+        marque:
+          type: string
+        modele:
+          type: string
+        statut:
+          type: string
+          enum:
+            - AVAILABLE
+            - IN_USE
+            - MAINTENANCE
+            - RETIRED
+
+    VehicleCreate:
+      type: object
+      required:
+        - immatriculation
+        - marque
+        - modele
+        - statut
+      properties:
+        id:
+          type: string
+          format: uuid
+        immatriculation:
+          type: string
+          maxLength: 20
+        marque:
+          type: string
+        modele:
+          type: string
+        statut:
+          type: string
+          enum:
+            - AVAILABLE
+            - IN_USE
+            - MAINTENANCE
+            - RETIRED
+
+    VehicleUpdate:
+      type: object
+      required:
+        - immatriculation
+        - marque
+        - modele
+        - statut
+      properties:
+        immatriculation:
+          type: string
+          maxLength: 20
+        marque:
+          type: string
+        modele:
+          type: string
+        statut:
+          type: string
+          enum:
+            - AVAILABLE
+            - IN_USE
+            - MAINTENANCE
+            - RETIRED
+

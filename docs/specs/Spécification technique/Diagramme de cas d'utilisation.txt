@@ -1,0 +1,46 @@
+@startuml
+
+left to right direction
+
+actor Administrateur
+actor Conducteur
+actor Technicien
+actor "Système de Localisation" as Localisation
+
+rectangle Système_de_Gestion_de_Flotte {
+  usecase "Modifier la disponibilité des véhicules" as UC1
+  usecase "Observer l'historique des véhicules" as UC2
+  usecase "Modifier les caractéristiques des véhicules" as UC3
+  usecase "Supprimer des comptes utilisateurs" as UC4
+  usecase "Envoyer des avertissements" as UC5
+  usecase "Créer/modifier le profil" as UC6
+  usecase "Ajouter le permis" as UC7
+  usecase "Réserver des véhicules" as UC8
+  usecase "Signaler des soucis techniques" as UC9
+  usecase "Consulter les véhicules" as UC10
+  usecase "Planifier et suivre les interventions" as UC11
+  usecase "Indiquer les coûts de maintenance" as UC12
+  usecase "Écrire les coordonnées GPS" as UC13
+  usecase "Signaler hors zone" as UC14
+}
+
+Administrateur --> UC1
+Administrateur --> UC2
+Administrateur --> UC3
+Administrateur --> UC4
+Administrateur --> UC5
+
+Conducteur --> UC6
+Conducteur --> UC7
+Conducteur --> UC8
+Conducteur --> UC9
+Conducteur --> UC10
+
+Technicien --> UC11
+Technicien --> UC12
+
+Localisation --> UC13
+Localisation --> UC14
+
+@enduml
+

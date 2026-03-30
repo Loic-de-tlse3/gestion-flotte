@@ -1,0 +1,91 @@
+openapi: 3.0.0
+info:
+  title: Reservation Service API
+  version: 1.0.0
+  description: API pour la gestion des réservations
+paths:
+  /reservations:
+    get:
+      summary: Obtenir la liste des réservations
+      responses:
+        '200':
+          description: Une liste de réservations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Reservation'
+    post:
+      summary: Créer une nouvelle réservation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reservation'
+      responses:
+        '201':
+          description: Réservation créée
+  /reservations/{id}:
+    get:
+      summary: Obtenir les détails d'une réservation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Détails de la réservation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+    put:
+      summary: Mettre à jour une réservation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reservation'
+      responses:
+        '200':
+          description: Réservation mise à jour
+    delete:
+      summary: Supprimer une réservation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Réservation supprimée
+components:
+  schemas:
+    Reservation:
+      type: object
+      properties:
+        id:
+          type: string
+        vehicleId:
+          type: string
+        driverId:
+          type: string
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+
