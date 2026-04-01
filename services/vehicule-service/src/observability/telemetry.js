@@ -43,7 +43,7 @@ const metricReader = new PeriodicExportingMetricReader({
 const resource = Resource.default().merge(
   new Resource({
     [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
-    [SemanticResourceAttributes.SERVICE_VERSION]: require('../../../package.json').version || '1.0.0',
+    [SemanticResourceAttributes.SERVICE_VERSION]: require('../../package.json').version || '1.0.0',
     [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: environment,
   }),
 );

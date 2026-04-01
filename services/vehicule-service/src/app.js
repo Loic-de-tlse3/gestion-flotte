@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const vehicleController = require('./controllers/vehicleController');
@@ -5,12 +7,15 @@ const {
   validateVehicleId,
   validateVehiclePayload,
 } = require('./middleware/vehicleValidation');
+const { authenticate, authorize } = require('./middleware/authMiddleware');
 const { disconnectProducer } = require('./kafka/producer');
 const logger = require('./observability/logger');
 const { httpLogger } = require('./observability/logger');
 
 const app = express();
 const port = 3000;
+const READ_ROLES = ['Admin', 'Conducteur', 'Technicien'];
+const WRITE_ROLES = ['Admin', 'Technicien'];
 
 // Middleware
 app.use(httpLogger); // Instrumentation HTTP automatique avec logs corrélés
@@ -23,12 +28,14 @@ app.get('/', (req, res) => {
   res.send('Service Véhicules - Microservice de gestion des véhicules');
 });
 
+app.use('/vehicles', authenticate);
+
 // CRUD Véhicules
-app.get('/vehicles', vehicleController.getVehicles);
-app.post('/vehicles', validateVehiclePayload, vehicleController.createVehicle);
-app.get('/vehicles/:id', validateVehicleId, vehicleController.getVehicleById);
-app.put('/vehicles/:id', validateVehicleId, validateVehiclePayload, vehicleController.updateVehicle);
-app.delete('/vehicles/:id', validateVehicleId, vehicleController.deleteVehicle);
+app.get('/vehicles', authorize(...READ_ROLES), vehicleController.getVehicles);
+app.post('/vehicles', authorize(...WRITE_ROLES), validateVehiclePayload, vehicleController.createVehicle);
+app.get('/vehicles/:id', authorize(...READ_ROLES), validateVehicleId, vehicleController.getVehicleById);
+app.put('/vehicles/:id', authorize(...WRITE_ROLES), validateVehicleId, validateVehiclePayload, vehicleController.updateVehicle);
+app.delete('/vehicles/:id', authorize(...WRITE_ROLES), validateVehicleId, vehicleController.deleteVehicle);
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
