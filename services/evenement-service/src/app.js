@@ -1,6 +1,9 @@
+require('dotenv').config();
+
 const express = require('express');
 const app = express();
 const port = Number(process.env.APP_PORT || 3004);
+const { authenticate } = require('./middleware/authMiddleware');
 const {
   startVehicleEventsConsumer,
   stopVehicleEventsConsumer,
@@ -16,6 +19,14 @@ app.use(express.json());
 app.get('/', (req, res) => {
   logger.info({ service: 'evenement-service' }, 'Health check route accessed');
   res.send('Service Évènements - Microservice de gestion des évènements');
+});
+
+app.use((req, res, next) => {
+  if (req.method === 'GET' && req.path === '/') {
+    return next();
+  }
+
+  return authenticate(req, res, next);
 });
 
 let server;
@@ -58,7 +69,7 @@ const shutdown = async (signal) => {
 
     process.exit(0);
   } catch (error) {
-    logger.error({ error: error.message }, 'Erreur lors de l'arrêt du consumer Kafka');
+    logger.error({ error: error.message }, 'Erreur lors de l\'arrêt du consumer Kafka');
     process.exit(1);
   }
 };
