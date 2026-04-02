@@ -8,6 +8,7 @@ const {
   startVehicleEventsConsumer,
   stopVehicleEventsConsumer,
 } = require('./kafka/vehicleEventsConsumer');
+const { disconnectProducer } = require('./kafka/producer');
 const logger = require('./observability/logger');
 const { httpLogger } = require('./observability/logger');
 
@@ -58,6 +59,7 @@ const shutdown = async (signal) => {
 
   try {
     await stopVehicleEventsConsumer();
+    await disconnectProducer();
 
     if (server) {
       server.close(() => {
