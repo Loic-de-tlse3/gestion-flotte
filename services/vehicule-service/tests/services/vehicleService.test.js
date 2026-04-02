@@ -1,7 +1,10 @@
-const vehicleService = require('../../src/services/vehicleService');
 jest.mock('../../src/repositories/vehicleRepository');
+jest.mock('../../src/kafka/producer', () => ({
+  publishVehicleEvent: jest.fn().mockResolvedValue(undefined),
+}));
 jest.mock('crypto');
 
+const vehicleService = require('../../src/services/vehicleService');
 const vehicleRepository = require('../../src/repositories/vehicleRepository');
 const { randomUUID } = require('crypto');
 
@@ -19,6 +22,7 @@ describe('vehicleService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     randomUUID.mockReturnValue(mockVehicle.id);
+    vehicleRepository.findById.mockResolvedValue(mockVehicle);
   });
 
   describe('listVehicles', () => {
@@ -79,7 +83,7 @@ describe('vehicleService', () => {
     });
 
     it('creates with provided id', async () => {
-const providedId = VALID_UUID;
+      const providedId = VALID_UUID;
       const payloadWithId = { ...payload, id: providedId };
       vehicleRepository.exists.mockResolvedValue(false);
       vehicleRepository.create.mockResolvedValue({ ...mockVehicle, id: providedId });
@@ -146,20 +150,23 @@ const providedId = VALID_UUID;
 
   describe('deleteVehicle', () => {
     it('deletes vehicle', async () => {
+      vehicleRepository.findById.mockResolvedValue(mockVehicle);
       vehicleRepository.remove.mockResolvedValue(true);
 
       const result = await vehicleService.deleteVehicle(mockVehicle.id);
 
       expect(result).toBe(true);
+      expect(vehicleRepository.findById).toHaveBeenCalledWith(mockVehicle.id);
       expect(vehicleRepository.remove).toHaveBeenCalledWith(mockVehicle.id);
     });
 
     it('returns false if not exists', async () => {
-      vehicleRepository.remove.mockResolvedValue(false);
+      vehicleRepository.findById.mockResolvedValue(null);
 
       const result = await vehicleService.deleteVehicle(mockVehicle.id);
 
       expect(result).toBe(false);
+      expect(vehicleRepository.remove).not.toHaveBeenCalled();
     });
 
     it('throws 400 for invalid id', async () => {

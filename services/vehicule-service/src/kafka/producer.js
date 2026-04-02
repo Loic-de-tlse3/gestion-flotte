@@ -13,22 +13,38 @@ const ensureProducerConnected = async () => {
   }
 };
 
-const publishVehicleEvent = async ({ eventType, vehicle }) => {
+const publishVehicleEvent = async ({
+  eventType,
+  vehicle,
+  payload,
+  key,
+  correlationId,
+  causationId = null,
+  entity = 'vehicule',
+}) => {
   await ensureProducerConnected();
 
+  const resolvedPayload = payload || vehicle;
+  const eventId = randomUUID();
+  const resolvedCorrelationId = correlationId || resolvedPayload?.maintenanceId || eventId;
+
   const event = {
-    eventId: randomUUID(),
+    eventId,
     eventType,
-    entity: 'vehicule',
+    eventVersion: 1,
+    entity,
     occurredAt: new Date().toISOString(),
-    payload: vehicle,
+    correlationId: resolvedCorrelationId,
+    causationId,
+    producer: 'vehicule-service',
+    payload: resolvedPayload,
   };
 
   await producer.send({
     topic,
     messages: [
       {
-        key: vehicle.id,
+        key: key || resolvedPayload?.id || resolvedPayload?.vehicleId || resolvedPayload?.maintenanceId || eventId,
         value: JSON.stringify(event),
       },
     ],

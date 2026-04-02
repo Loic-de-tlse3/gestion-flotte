@@ -9,11 +9,19 @@ const {
 } = require('./middleware/vehicleValidation');
 const { authenticate, authorize } = require('./middleware/authMiddleware');
 const { disconnectProducer } = require('./kafka/producer');
+const {
+  startMaintenanceEventsConsumer,
+  stopMaintenanceEventsConsumer,
+} = require('./kafka/maintenanceEventsConsumer');
+const {
+  startConducteurEventsConsumer,
+  stopConducteurEventsConsumer,
+} = require('./kafka/conducteurEventsConsumer');
 const logger = require('./observability/logger');
 const { httpLogger } = require('./observability/logger');
 
 const app = express();
-const port = 3000;
+const port = Number(process.env.APP_PORT || 3000);
 const READ_ROLES = ['Admin', 'Conducteur', 'Technicien'];
 const WRITE_ROLES = ['Admin', 'Technicien'];
 
@@ -53,8 +61,22 @@ app.listen(port, () => {
   logger.info({ port, service: 'vehicule-service' }, 'Service Véhicules démarré');
 });
 
+const startConsumerWithRetry = async () => {
+  try {
+    await startMaintenanceEventsConsumer();
+    await startConducteurEventsConsumer();
+  } catch (error) {
+    logger.error({ error: error.message }, '[Kafka] Consumer maintenance indisponible, nouvelle tentative dans 5s');
+    setTimeout(startConsumerWithRetry, 5000);
+  }
+};
+
+startConsumerWithRetry();
+
 const shutdown = async (signal) => {
   try {
+    await stopMaintenanceEventsConsumer();
+    await stopConducteurEventsConsumer();
     await disconnectProducer();
     logger.info({ signal }, 'Service Véhicules arrêté proprement');
     process.exit(0);

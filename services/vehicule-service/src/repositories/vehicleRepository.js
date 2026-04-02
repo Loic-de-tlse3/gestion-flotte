@@ -137,6 +137,27 @@ const update = async (id, vehicle) => {
   }
 };
 
+const updateStatus = async (id, status) => {
+  const query = `
+    UPDATE service_vehicles.vehicles
+    SET statut = $2::vehicle_status_enum
+    WHERE id = $1::uuid
+    RETURNING
+      id::text AS id,
+      immatriculation,
+      marque,
+      "modèle" AS modele,
+      statut::text AS statut
+  `;
+
+  const { rows } = await pool.query(query, [id, status]);
+  if (rows.length === 0) {
+    return null;
+  }
+
+  return mapRowToVehicle(rows[0]);
+};
+
 const remove = async (id) => {
   const { rowCount } = await pool.query('DELETE FROM service_vehicles.vehicles WHERE id = $1::uuid', [id]);
   return rowCount > 0;
@@ -148,5 +169,6 @@ module.exports = {
   exists,
   create,
   update,
+  updateStatus,
   remove,
 };
