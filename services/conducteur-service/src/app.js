@@ -13,6 +13,11 @@ const {
   validateAssignmentClosePayload,
 } = require('./middleware/assignmentValidation');
 const { authenticate, authorize } = require('./middleware/authMiddleware');
+const {
+  startVehicleAssignmentEventsConsumer,
+  stopVehicleAssignmentEventsConsumer,
+} = require('./kafka/vehicleAssignmentEventsConsumer');
+const { disconnectProducer } = require('./kafka/producer');
 
 const app = express();
 const port = Number(process.env.APP_PORT || 3001);
@@ -56,8 +61,54 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Démarrage du serveur
-app.listen(port, () => {
-  console.log(`Service Conducteur démarré sur le port ${port}`);
-});
+let server;
+let isShuttingDown = false;
+
+const startConsumerWithRetry = async () => {
+  if (isShuttingDown) {
+    return;
+  }
+
+  try {
+    await startVehicleAssignmentEventsConsumer();
+  } catch (error) {
+    console.error('[Kafka] Consumer indisponible, nouvelle tentative dans 5s:', error.message);
+    setTimeout(startConsumerWithRetry, 5000);
+  }
+};
+
+const start = async () => {
+  server = app.listen(port, () => {
+    console.log(`Service Conducteur démarré sur le port ${port}`);
+  });
+
+  await startConsumerWithRetry();
+};
+
+const shutdown = async (signal) => {
+  isShuttingDown = true;
+
+  try {
+    await stopVehicleAssignmentEventsConsumer();
+    await disconnectProducer();
+
+    if (server) {
+      server.close(() => {
+        console.log(`Service Conducteur arrêté proprement (${signal})`);
+        process.exit(0);
+      });
+      return;
+    }
+
+    process.exit(0);
+  } catch (error) {
+    console.error('Erreur lors de l\'arrêt du service Conducteur:', error.message);
+    process.exit(1);
+  }
+};
+
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+
+start();
 

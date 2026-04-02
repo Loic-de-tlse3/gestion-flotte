@@ -203,7 +203,22 @@ const createAssignmentForDriver = async (driverId, payload) => {
     motif: typeof payload.motif === 'string' ? payload.motif.trim() : null,
   };
 
-  return assignmentRepository.create(assignment);
+  const createdAssignment = await assignmentRepository.create(assignment);
+
+  await publishConducteurEvent({
+    eventType: 'conducteur.affectation_demandee',
+    payload: {
+      assignmentId: createdAssignment.id,
+      driverId: createdAssignment.driverId,
+      vehicleId: createdAssignment.vehicleId,
+      requestedAt: new Date().toISOString(),
+    },
+    key: createdAssignment.id,
+    correlationId: createdAssignment.id,
+    entity: 'affectation',
+  });
+
+  return createdAssignment;
 };
 
 const closeAssignment = async (assignmentId, payload) => {
@@ -241,6 +256,64 @@ const closeAssignment = async (assignmentId, payload) => {
   return assignmentRepository.close(assignmentId, dateFin.toISOString());
 };
 
+const handleVehicleAssignmentEvent = async (event) => {
+  const assignmentId = event?.payload?.assignmentId;
+  if (!assignmentId || !isUuid(assignmentId)) {
+    return null;
+  }
+
+  const assignment = await assignmentRepository.findById(assignmentId);
+  if (!assignment) {
+    return null;
+  }
+
+  if (event.eventType === 'vehicule.affectation_acceptee') {
+    await publishConducteurEvent({
+      eventType: 'conducteur.assigne',
+      payload: {
+        assignmentId,
+        driverId: assignment.driverId,
+        vehicleId: assignment.vehicleId,
+        status: 'ASSIGNED',
+      },
+      key: assignmentId,
+      correlationId: event.correlationId || assignmentId,
+      causationId: event.eventId,
+      entity: 'affectation',
+    });
+
+    return assignment;
+  }
+
+  if (event.eventType === 'vehicule.affectation_refusee') {
+    if (!assignment.dateFin) {
+      const assignmentStartAt = new Date(assignment.dateDebut).getTime();
+      const cancellationDate = new Date(Math.max(Date.now(), assignmentStartAt + 1000));
+      await assignmentRepository.close(assignmentId, cancellationDate.toISOString());
+    }
+
+    await publishConducteurEvent({
+      eventType: 'conducteur.affectation_annulee',
+      payload: {
+        assignmentId,
+        driverId: assignment.driverId,
+        vehicleId: assignment.vehicleId,
+        status: 'CANCELLED',
+        reasonCode: event.payload?.reasonCode || 'VEHICLE_NOT_AVAILABLE',
+        reasonMessage: event.payload?.reasonMessage || 'Affectation refusée par le service véhicule',
+      },
+      key: assignmentId,
+      correlationId: event.correlationId || assignmentId,
+      causationId: event.eventId,
+      entity: 'affectation',
+    });
+
+    return assignment;
+  }
+
+  return null;
+};
+
 module.exports = {
   listConducteurs,
   getConducteurById,
@@ -250,4 +323,5 @@ module.exports = {
   listAssignmentsByDriver,
   createAssignmentForDriver,
   closeAssignment,
+  handleVehicleAssignmentEvent,
 };

@@ -39,7 +39,7 @@ Notes:
 
 ```bash
 cd services/conducteur-service
-APP_PORT=3006 DATABASE_URL='postgresql://utilisateur_flotte:archi_distribuée@localhost:5432/flotte_db' npm run start
+APP_PORT=3001 DATABASE_URL='postgresql://utilisateur_flotte:<MDP DE VOTRE BD>@localhost:5432/flotte_db' npm run start
 ```
 
 Laisse ce terminal ouvert.
@@ -51,7 +51,7 @@ Laisse ce terminal ouvert.
 ```bash
 TS=$(date +%s%N)
 TEL="06${TS: -8}"
-DRIVER_ID=$(curl -s -X POST http://localhost:3006/drivers \
+DRIVER_ID=$(curl -s -X POST http://localhost:3001/drivers \
 	-H "Content-Type: application/json" \
 	-d '{"keycloakId":"kc-test-'$(date +%s%N)'","numeroPermis":"75PC'$(date +%s%N | tail -c 7)'","nom":"Dupont","prenom":"Jean","email":"jean.dupont@test.fr","telephone":"'$TEL'","statutPermis":true,"categoriePermis":"B"}' \
 	| jq -r '.id')
@@ -66,12 +66,12 @@ Tu dois obtenir un UUID (pas `null`).
 
 ```bash
 VEHICLE_ID="550e8400-e29b-41d4-a716-446655440001"
-ASSIGNMENT_ID=$(curl -s -X POST http://localhost:3006/drivers/$DRIVER_ID/assignments \
+ASSIGNMENT_ID=$(curl -s -X POST http://localhost:3001/drivers/$DRIVER_ID/assignments \
 	-H "Content-Type: application/json" \
 	-d '{"vehicleId":"'$VEHICLE_ID'","dateDebut":"2026-03-29T10:00:00Z","dateFin":"2026-03-30T18:00:00Z","motif":"Livraison client"}' \
 	| jq -r '.id')
 echo "$ASSIGNMENT_ID"
-curl -s -X PUT http://localhost:3006/assignments/$ASSIGNMENT_ID/end \
+curl -s -X PUT http://localhost:3001/assignments/$ASSIGNMENT_ID/end \
 	-H "Content-Type: application/json" \
 	-d '{"dateFin":"2026-03-30T17:35:00Z"}' \
 	| jq '.'
@@ -82,7 +82,7 @@ curl -s -X PUT http://localhost:3006/assignments/$ASSIGNMENT_ID/end \
 ## 6) Vérifier qu'il n'y a plus d'assignation active
 
 ```bash
-    curl -s "http://localhost:3006/drivers/$DRIVER_ID/assignments?active=true" | jq 'length'
+	curl -s "http://localhost:3001/drivers/$DRIVER_ID/assignments?active=true" | jq 'length'
 ```
 
 Résultat attendu: `0`

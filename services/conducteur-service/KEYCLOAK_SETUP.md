@@ -77,7 +77,7 @@ KEYCLOAK_URL=http://localhost:8080 \
 KEYCLOAK_REALM=flotte-realm \
 KEYCLOAK_CLIENT_ID=conducteur-service \
 KEYCLOAK_CLIENT_SECRET=your-secret \
-APP_PORT=3006 \
+APP_PORT=3001 \
 DATABASE_URL='postgresql://utilisateur_flotte:archi_distribuée@localhost:5432/flotte_db' \
 npm run start
 ```
@@ -132,7 +132,7 @@ Toutes les routes **sauf** `GET /` nécessitent un token valide dans l'header `A
 
 ```bash
 TOKEN="votre-token-jwt"
-curl -X POST http://localhost:3006/drivers \
+curl -X POST http://localhost:3001/drivers \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -150,14 +150,14 @@ curl -X POST http://localhost:3006/drivers \
 ### Lister les conducteurs
 
 ```bash
-curl -X GET http://localhost:3006/drivers \
+curl -X GET http://localhost:3001/drivers \
   -H "Authorization: Bearer $TOKEN"
 ```
 
 ### Accès sans token (erreur 401)
 
 ```bash
-curl -X GET http://localhost:3006/drivers
+curl -X GET http://localhost:3001/drivers
 # Résultat: 401 Authentication failed
 ```
 
@@ -169,7 +169,7 @@ curl -X GET http://localhost:3006/drivers
 #!/bin/bash
 
 KEYCLOAK_URL="http://localhost:8080"
-SERVICE_URL="http://localhost:3006"
+SERVICE_URL="http://localhost:3001"
 REALM="flotte-realm"
 CLIENT_ID="conducteur-service"
 CLIENT_SECRET="your-client-secret"
@@ -257,7 +257,7 @@ Keycloak Server (8080)
 Client reçoit Bearer token
     ↓ (Authorization: Bearer <token>)
     ↓
-Conducteur Service (3006)
+Conducteur Service (3001)
     ↓ (vérifie JWT signature)
     ↓ (utilise clés publiques Keycloak)
     ↓
